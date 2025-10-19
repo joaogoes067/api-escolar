@@ -1,0 +1,89 @@
+SISTEMA DE CONTROLE ESCOLAR 
+
+# 🌟 Sistema de Escolar 
+
+Olá, eu sou o João Antônio Alves, 20200069549! 👋
+
+Este projeto é um sistema web backend que gerencia o cadastro de responsáveis e alunos, além de implementar autenticação robusta (JWT) e autorização por nível de acesso (role). Ele demonstra a comunicação entre Back-end e Banco de Dados.
+
+---
+
+## 🛠️ Guia de Inicialização (Para Avaliadores)
+
+Siga os passos para configurar e executar o projeto backend (a API) e carregar os dados de teste.
+
+### Pré-requisitos
+1.  Node.js (v18+) e npm instalados.
+2.  MongoDB Atlas (ou local) com a URL de conexão.
+
+### 1. Configuração Detalhada do Backend
+
+Abra o terminal na pasta `backend`.
+
+1.  Criar o Projeto Node.js: (Se ainda não foi feito)
+    npm init -y
+
+2.  Instalar Dependências Essenciais (Express, Prisma, Segurança):
+    Este é o comando que instala TUDO que a API precisa para funcionar.
+    npm install express @prisma/client 
+    npm install bcrypt 
+    npm install jsonwebtoken 
+    npm install dotenv
+    npm install mongodb 
+    npm install prisma --save-dev
+    npm install express-validator 
+    npm install nodemon --save-dev
+    
+    (Nota: Algumas dessas dependências podem ser instaladas juntas, mas a lista acima garante que tudo seja instalado.)
+
+3.  Instalar e Inicializar o Prisma (Ferramentas de Desenvolvimento):
+    npx prisma init
+    *Obs: O comando npx prisma init cria os arquivos prisma/schema.prisma e .env.*
+
+4.  Sincronizar o Banco de Dados e Gerar o Prisma Client:
+    Estes comandos sincronizam a estrutura (db push) e geram o código que a API usa para acessá-las (prisma generate).
+    npx prisma db push
+    npx prisma generate
+
+5.  Configurar Variáveis de Ambiente (.env):
+    Crie/edite o arquivo .env e substitua o valor DATABASE_URL pela sua URL de conexão do MongoDB Atlas. Defina também a chave secreta do JWT.
+    
+    # Exemplo do arquivo .env
+    DATABASE_URL="mongodb+srv://[SEU_USER]:[SUA_SENHA]@[CLUSTER].mongodb.net/Cluster0?retryWrites=true&w=majority&appName=Cluster0"
+    JWT_SECRET="dab8d29caec07e5e707ffb128bce2ea64507665514c1ef6584c"
+
+6.  Carregar Dados de Teste (Seeding Profissional):
+    Para garantir que os usuários Admin e Maria Silva estejam disponíveis para teste, execute o script de seeder.
+    
+    # OBS: O SEED.JS DEVE SER EXECUTADO PARA O BANCO DE DADOS
+    node prisma/seed.js 
+
+7.  Iniciar o Servidor Express:
+    node index.js
+    
+    O servidor estará rodando em http://localhost:3000.
+
+### 2. Guia de Teste da API (Thunder Client)
+
+Use o Thunder Client (ou Postman) para testar o fluxo de autenticação e as permissões.
+
+#### Cenário A: Usuário Comum (Maria)
+
+| Passo | Método | URL | Body (JSON) | Objetivo |
+| :--- | :--- | :--- | :--- | :--- |
+| 1. Login | POST | /login | {"email": "maria@email.com", "password": "senha123"} | Obter o TOKEN de acesso (necessário para todas as rotas privadas). |
+| 2. Cadastrar Aluno | POST | /aluno | {"nomeAluno": "João Silva", "idade": 10, "serie": "5º ano"} | (Usando o token de Maria) Cadastra um aluno vinculado a Maria. |
+| 3. Ver Perfil | GET | /meu-perfil | - | Ver os dados de Maria e os alunos cadastrados por ela. |
+
+
+#### Cenário B: Usuário Administrador (Admin)
+
+1.  Login Admin: Use o JSON: {"email": "admin@escola.com", "password": "admin123"} para obter o token de administrador.
+2.  Rota Privada (Admin): Use o novo TOKEN de Admin e faça um GET para /list-responsaveis.
+3.  Resultado Esperado: O status deve ser 200 OK e a lista completa de todos os responsáveis no sistema deve ser exibida.
+
+#### Cenário C: Teste de Autorização Negada
+
+1. Login: Use o TOKEN de Maria.
+2. Faça um GET para /list-responsaveis com o TOKEN de Maria.
+3. Você verá que dará erro (403 Forbidden), pois Maria não tem a role "admin".
